@@ -58,6 +58,8 @@ async def on_guild_remove(guild):
 
 @client.command()
 async def 接続(ctx):
+    global channel_id
+    channel_id = ctx.channel.id
     if ctx.message.guild:
         if ctx.author.voice is None:
             await ctx.send('ボイスチャンネルに接続してから呼び出してください。')
