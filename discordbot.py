@@ -57,7 +57,7 @@ async def on_guild_remove(guild):
     await client.change_presence(activity=discord.Game(name=presence))
 
 @client.command()
-async def 接続(ctx):
+async def s(ctx):
     global channel_id
     channel_id = ctx.channel.id
     if ctx.message.guild:
@@ -75,7 +75,7 @@ async def 接続(ctx):
                 await ctx.author.voice.channel.connect()
 
 @client.command()
-async def 切断(ctx):
+async def dc(ctx):
     if ctx.message.guild:
         if ctx.voice_client is None:
             await ctx.send('ボイスチャンネルに接続していません。')
