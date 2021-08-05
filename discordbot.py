@@ -84,7 +84,7 @@ async def dc(ctx):
 
 @client.event
 async def on_message(message):
-    if message.channel.id == chanel_id:
+    if message.channel.id == channel_id:
         if message.content.startswith(prefix):
             pass
         else:
