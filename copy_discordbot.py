@@ -84,51 +84,50 @@ async def dc(ctx):
 
 @client.event
 async def on_message(message):
-    if message.channel.id == chanel_id:
-        if message.content.startswith(prefix):
-            pass
+    if message.content.startswith(prefix):
+        pass
+    else:
+        if message.guild.voice_client:
+            text = message.content
+            text = text.replace('\n', '、')
+            pattern = r'<@(\d+)>'
+            match = re.findall(pattern, text)
+            for user_id in match:
+                user = await client.fetch_user(user_id)
+                user_name = f'、{user.name}へのメンション、'
+                text = re.sub(f'<@{user_id}>', user_name, text)
+            pattern = r'<@&(\d+)>'
+            match = re.findall(pattern, text)
+            for role_id in match:
+                role = message.guild.get_role(int(role_id))
+                role_name = f'、{role.name}へのメンション、'
+                text = re.sub(f'<@&{role_id}>', role_name, text)
+            pattern = r'<:([a-zA-Z0-9_]+):\d+>'
+            match = re.findall(pattern, text)
+            for emoji_name in match:
+                emoji_read_name = emoji_name.replace('_', ' ')
+                text = re.sub(rf'<:{emoji_name}:\d+>', f'、{emoji_read_name}、', text)
+            pattern = r'https://tenor.com/view/[\w/:%#\$&\?\(\)~\.=\+\-]+'
+            text = re.sub(pattern, '画像', text)
+            pattern = r'https?://[\w/:%#\$&\?\(\)~\.=\+\-]+(\.jpg|\.jpeg|\.gif|\.png|\.bmp)'
+            text = re.sub(pattern, '、画像', text)
+            pattern = r'https?://[\w/:%#\$&\?\(\)~\.=\+\-]+'
+            text = re.sub(pattern, '、URL', text)
+            text = text
+            if text[-1:] == 'w' or text[-1:] == 'W' or text[-1:] == 'ｗ' or text[-1:] == 'W':
+                while text[-2:-1] == 'w' or text[-2:-1] == 'W' or text[-2:-1] == 'ｗ' or text[-2:-1] == 'W':
+                    text = text[:-1]
+                text = text[:-1] + '、ワラ'
+            if message.attachments:
+                text += '、添付ファイル'
+            while message.guild.voice_client.is_playing():
+                await asyncio.sleep(0.5)
+            tts(text)
+            source = discord.FFmpegPCMAudio('/tmp/message.mp3')
+            message.guild.voice_client.play(source)
         else:
-            if message.guild.voice_client:
-                text = message.content
-                text = text.replace('\n', '、')
-                pattern = r'<@(\d+)>'
-                match = re.findall(pattern, text)
-                for user_id in match:
-                    user = await client.fetch_user(user_id)
-                    user_name = f'、{user.name}へのメンション、'
-                    text = re.sub(f'<@{user_id}>', user_name, text)
-                pattern = r'<@&(\d+)>'
-                match = re.findall(pattern, text)
-                for role_id in match:
-                    role = message.guild.get_role(int(role_id))
-                    role_name = f'、{role.name}へのメンション、'
-                    text = re.sub(f'<@&{role_id}>', role_name, text)
-                pattern = r'<:([a-zA-Z0-9_]+):\d+>'
-                match = re.findall(pattern, text)
-                for emoji_name in match:
-                    emoji_read_name = emoji_name.replace('_', ' ')
-                    text = re.sub(rf'<:{emoji_name}:\d+>', f'、{emoji_read_name}、', text)
-                pattern = r'https://tenor.com/view/[\w/:%#\$&\?\(\)~\.=\+\-]+'
-                text = re.sub(pattern, '画像', text)
-                pattern = r'https?://[\w/:%#\$&\?\(\)~\.=\+\-]+(\.jpg|\.jpeg|\.gif|\.png|\.bmp)'
-                text = re.sub(pattern, '、画像', text)
-                pattern = r'https?://[\w/:%#\$&\?\(\)~\.=\+\-]+'
-                text = re.sub(pattern, '、URL', text)
-                text = text
-                if text[-1:] == 'w' or text[-1:] == 'W' or text[-1:] == 'ｗ' or text[-1:] == 'W':
-                    while text[-2:-1] == 'w' or text[-2:-1] == 'W' or text[-2:-1] == 'ｗ' or text[-2:-1] == 'W':
-                        text = text[:-1]
-                    text = text[:-1] + '、ワラ'
-                if message.attachments:
-                    text += '、添付ファイル'
-                while message.guild.voice_client.is_playing():
-                    await asyncio.sleep(0.5)
-                tts(text)
-                source = discord.FFmpegPCMAudio('/tmp/message.mp3')
-                message.guild.voice_client.play(source)
-            else:
-                pass
-        await client.process_commands(message)
+            pass
+    await client.process_commands(message)
 
 @client.event
 async def on_voice_state_update(member, before, after):
@@ -138,7 +137,8 @@ async def on_voice_state_update(member, before, after):
             await client.change_presence(activity=discord.Game(name=presence))
         else:
             if member.guild.voice_client is None:
-                pass
+                await asyncio.sleep(0.5)
+                await after.channel.connect()
             else:
                 if member.guild.voice_client.channel is after.channel:
                     text = member.name + 'さんが入室したよ'
@@ -164,6 +164,14 @@ async def on_voice_state_update(member, before, after):
                         tts(text)
                         source = discord.FFmpegPCMAudio('/tmp/message.mp3')
                         member.guild.voice_client.play(source)
+    elif before.channel != after.channel:
+        if member.guild.voice_client:
+            if member.guild.voice_client.channel is before.channel:
+                if len(member.guild.voice_client.channel.members) == 1 or member.voice.self_mute:
+                    await asyncio.sleep(0.5)
+                    await member.guild.voice_client.disconnect()
+                    await asyncio.sleep(0.5)
+                    await after.channel.connect()
 
 @client.event
 async def on_command_error(ctx, error):
