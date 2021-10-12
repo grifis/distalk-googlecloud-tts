@@ -77,13 +77,7 @@ async def s(ctx):
             else:
                 await ctx.author.voice.channel.connect()
 
-@client.command()
-async def dc(ctx):
-    if ctx.message.guild:
-        if ctx.voice_client is None:
-            await ctx.send('ボイスチャンネルに接続していません。')
-        else:
-            await ctx.voice_client.disconnect()
+
 
 @client.event
 async def on_message(message):
