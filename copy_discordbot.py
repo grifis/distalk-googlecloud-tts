@@ -6,7 +6,6 @@ import traceback
 import re
 import json
 from google.cloud import texttospeech
-import urllib.parse
 
 prefix = os.getenv('DISCORD_BOT_PREFIX', default='🦑')
 tts_lang = os.getenv('DISCORD_BOT_LANG', default='ja-JP')
@@ -14,7 +13,6 @@ tts_voice = os.getenv('DISCORD_BOT_VOICE', default='ja-JP-Wavenet-B')
 token = os.environ['DISCORD_BOT_TOKEN']
 client = commands.Bot(command_prefix=prefix)
 channel_id = []
-voice_flag = True
 
 google_type = os.environ['GOOGLE_TYPE']
 google_project_id = os.environ['GOOGLE_PROJECT_ID']
@@ -85,14 +83,6 @@ async def dc(ctx):
         else:
             await ctx.voice_client.disconnect()
 
-@client.command()
-async def dc(invoke):
-    global voice_flag
-    if voice_flag:
-        voice_flag = False
-    else:
-        voice_flag = True
-
 @client.event
 async def on_message(message):
     if message.channel.id in channel_id:
@@ -134,15 +124,9 @@ async def on_message(message):
                     text += '、添付ファイル'
                 while message.guild.voice_client.is_playing():
                     await asyncio.sleep(0.5)
-                if voice_flag:
-                    tts(text)
-                    source = discord.FFmpegPCMAudio('/tmp/message.mp3')
-                    message.guild.voice_client.play(source)
-                else: 
-                    if len(text) < 100:
-                        s_quote = urllib.parse.quote(text)
-                        mp3url = f'http://translate.google.com/translate_tts?ie=UTF-8&q={s_quote}&tl={lang}&client=tw-ob'
-                        message.guild.voice_client.play(discord.FFmpegPCMAudio(mp3url))
+                tts(text)
+                source = discord.FFmpegPCMAudio('/tmp/message.mp3')
+                message.guild.voice_client.play(source)
             else:
                 pass
     await client.process_commands(message)
