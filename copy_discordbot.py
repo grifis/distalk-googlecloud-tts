@@ -399,7 +399,7 @@ class Music(commands.Cog):
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
 
-client.add_cog(Music(client))
+client.add_cog(Music(bot))
 
 
 client.run(token)
