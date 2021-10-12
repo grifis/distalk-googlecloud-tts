@@ -265,7 +265,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 class Music(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot = client
 
     @commands.command()
     async def join(self, ctx, *, channel: discord.VoiceChannel):
