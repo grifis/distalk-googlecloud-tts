@@ -12,6 +12,7 @@ tts_lang = os.getenv('DISCORD_BOT_LANG', default='ja-JP')
 tts_voice = os.getenv('DISCORD_BOT_VOICE', default='ja-JP-Wavenet-B')
 token = os.environ['DISCORD_BOT_TOKEN']
 client = commands.Bot(command_prefix=prefix)
+channel_id = None
 
 google_type = os.environ['GOOGLE_TYPE']
 google_project_id = os.environ['GOOGLE_PROJECT_ID']
