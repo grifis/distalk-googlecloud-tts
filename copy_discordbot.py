@@ -141,6 +141,13 @@ async def on_voice_state_update(member, before, after):
             if member.guild.voice_client is None:
                 await asyncio.sleep(0.5)
                 await after.channel.connect()
+                text = 'ハロー、みょすただよ'
+                while member.guild.voice_client.is_playing():
+                    await asyncio.sleep(0.5)
+                tts(text)
+                source = discord.FFmpegPCMAudio('/tmp/message.mp3')
+                member.guild.voice_client.play(source)
+
             else:
                 if member.guild.voice_client.channel is after.channel:
                     text = member.name + 'さんが入室したよ'
