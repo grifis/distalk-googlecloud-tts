@@ -1,1 +1,1 @@
-discordbot: python copy_discordbot.py
+discordbot: python discordbot.py
